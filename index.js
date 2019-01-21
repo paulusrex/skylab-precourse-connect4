@@ -29,6 +29,9 @@ class Connect4 {
         $(`#col-${c}`).append(`<div class="chip" id="chip-${c}${r}"></div>`);
       }
     }
+    // $(".anim").hover(function() {
+    //   $(this).css("background-color", colorPlayer);
+    // });
   }
 
   drawBoard() {
@@ -53,14 +56,25 @@ class Connect4 {
     }
     const firstEmpty = this.board[col].findIndex(chip => !chip);
     this.board[col][firstEmpty] = player;
-    return firstEmpty;
+    // $(`#chip-${col}${firstEmpty}`) // TODO: animate
   }
 
   onClick(col) {
+    if (!this.nowPlaying) {
+      return;
+    }
     this.dropChip(col, this.nowPlaying);
     this.drawBoard();
-    console.log(this.checkWinner());
-    this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
+    const winner = this.checkWinner();
+    if (winner) {
+      this.nowPlaying = false;
+      alert("Ha ganado el jugador " + winner.player);
+      // player: b[c][r],
+      // init: { col: c, row: r },
+      // type: "backslash",
+    } else {
+      this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
+    }
   }
 
   checkWinner() {
