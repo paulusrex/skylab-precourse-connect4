@@ -1,0 +1,58 @@
+#root {
+  /* display: flex;
+  flex-direction: col; */
+  width: 1200px;
+}
+
+#chip-selector {
+  display: flex;
+  flex-direction: row;
+  width: 1200px;
+}
+
+#board {
+  display: flex;
+  flex-direction: row;
+  width: 1200px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  background-color: yellow;
+  width: 10%;
+}
+
+.col-anim {
+  display: flex;
+  flex-direction: column;
+  background-color: yellow;
+  width: 10%;
+}
+
+.chip {
+  width: 95px;
+  height: 95px;
+  background-color: aliceblue;
+  border-radius: 50%;
+  margin: 5px auto;
+  border: 2px solid darkcyan;
+}
+
+.anim {
+  width: 95px;
+  height: 95px;
+  background-color: transparent;
+  border-radius: 50%;
+  margin: 5px auto;
+  border: 2px solid transparent;
+}
+
+.anim:hover {
+  width: 95px;
+  height: 95px;
+  background-color: black;
+  border-radius: 50%;
+  margin: 5px auto;
+  border: 2px solid transparent;
+}
