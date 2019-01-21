@@ -9,6 +9,7 @@ class Connect4 {
     this.board = [];
     this.initBoard();
     this.drawInit();
+    $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
   }
 
   initBoard() {
@@ -94,6 +95,7 @@ class Connect4 {
         this.board = [];
         this.initBoard();
         this.drawBoard();
+        $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
       }
     } else {
       this.animationInProgress = true;
