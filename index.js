@@ -4,7 +4,7 @@ class Connect4 {
     this.rows = rows;
     this.nowPlaying = 1;
     this.playerColors = ["white", "red", "blue"];
-    this.playerNames = ["", "Rojo", "Azul"];
+    this.playerNames = ["", "rojas", "azules"];
     this.animationInProgress = false;
     this.board = [];
     this.initBoard();
@@ -70,7 +70,7 @@ class Connect4 {
   }
 
   async onClick(col) {
-    if (!this.nowPlaying) {
+    if (!this.nowPlaying || this.animationInProgress) {
       return;
     }
     const row = this.dropChip(col, this.nowPlaying);
@@ -79,10 +79,22 @@ class Connect4 {
       this.nowPlaying = false;
       this.drawBoard();
       await new Promise(resolve => setTimeout(resolve, 800));
-      alert("Ha ganado el jugador " + this.playerNames[winner.player]);
-      // player: b[c][r],
-      // init: { col: c, row: r },
-      // type: "backslash",
+      if (winner.player === 0) {
+        alert("Habeis empatado");
+      } else {
+        alert("Han ganado las " + this.playerNames[winner.player]);
+      }
+      let response = "";
+      do {
+        response = prompt("¿Quereis volver a jugar (s/n)?");
+      } while (!/[s|n]/i.test(response));
+      if (response.toLowerCase() === "s") {
+        this.nowPlaying = 1;
+        this.animationInProgress = false;
+        this.board = [];
+        this.initBoard();
+        this.drawBoard();
+      }
     } else {
       this.animationInProgress = true;
       $(`#anim-${col}`)
@@ -95,7 +107,7 @@ class Connect4 {
       this.animationInProgress = false;
       this.drawBoard();
       this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
-      this.onMouseOver(col);
+      $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
     }
   }
 
@@ -183,8 +195,22 @@ class Connect4 {
         }
       }
     }
+
+    // check draw
+    if (b.every(c => c.every(r => r !== false))) {
+      return {
+        player: 0,
+        init: { col: 0, row: 0 },
+        type: "draw",
+      };
+    }
+
     return false;
   }
 }
 
 let game = new Connect4({ cols: 7, rows: 6 });
+
+alert(
+  `Puedes salir o reiniciar en cualquier momento con los iconos al lado del título`
+);

@@ -4,6 +4,20 @@
   width: 1200px;
 }
 
+h1 {
+  display: inline;
+}
+
+i {
+  margin-left: 10px;
+  font-size: 30px;
+}
+
+i:hover {
+  transition: 0.4s;
+  color: red;
+}
+
 #chip-selector {
   display: flex;
   flex-direction: row;
@@ -46,13 +60,4 @@
   border-radius: 50%;
   margin: 5px auto;
   border: 2px solid transparent;
-}
-
-@keyframes example {
-  from {
-    background-color: red;
-  }
-  to {
-    background-color: yellow;
-  }
 }
