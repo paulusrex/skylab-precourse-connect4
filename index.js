@@ -1,15 +1,22 @@
-class Connect4 {
-  constructor({ cols, rows }) {
-    this.cols = cols;
+class Board {
+  constructor({ cols = 7, rows = 6, baseBoard = null }) {
     this.rows = rows;
-    this.nowPlaying = 1;
-    this.playerColors = ["white", "red", "blue"];
-    this.playerNames = ["", "rojas", "azules"];
-    this.animationInProgress = false;
-    this.board = [];
-    this.initBoard();
-    this.drawInit();
-    $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+    this.cols = cols;
+    if (baseBoard === null) {
+      this.board = [];
+      this.initBoard();
+    } else {
+      this.board = baseBoard.copy();
+    }
+    this.initBoard = this.initBoard.bind(this);
+    this.isColumnFull = this.isColumnFull.bind(this);
+    this.copy = this.copy.bind(this);
+    this.forEach = this.forEach.bind(this);
+    this.map = this.map.bind(this);
+    this.dropChip = this.dropChip.bind(this);
+    this.checkWinner = this.checkWinner.bind(this);
+    this.checkPossibleWin = this.checkPossibleWin.bind(this);
+    this.checkPossibleLose = this.checkPossibleLose.bind(this);
   }
 
   initBoard() {
@@ -21,43 +28,20 @@ class Connect4 {
     }
   }
 
-  drawInit() {
-    for (let c = 0; c < this.cols; c++) {
-      $("#board").append(`<div class="col" id="col-${c}"></div>`);
-      $(`#chip-selector`).append(
-        `<div 
-            class="col-anim" 
-            id="col-anim-${c}" 
-            onclick="game.onClick(${c});" 
-            onmouseover="game.onMouseOver(${c});"
-            onmouseout="game.onMouseOut(${c});"
-          >
-         </div>`
-      );
-      $(`#col-anim-${c}`).append(`<div class="anim" id="anim-${c}"></div>`);
-      for (let r = this.rows - 1; r >= 0; r--) {
-        $(`#col-${c}`).append(`<div class="chip" id="chip-${c}${r}"></div>`);
-      }
-    }
-  }
-
-  drawBoard() {
-    this.board.forEach((statusCol, indexCol) => {
-      statusCol.forEach((chip, indexRow) => {
-        if (!chip) {
-          $(`#chip-${indexCol}${indexRow}`).css("background-color", "white");
-        } else {
-          $(`#chip-${indexCol}${indexRow}`).css(
-            "background-color",
-            this.playerColors[chip]
-          );
-        }
-      });
-    });
-  }
-
   isColumnFull(col) {
     return this.board[col][this.rows - 1] !== false;
+  }
+
+  copy() {
+    return this.board.map(col => [...col]);
+  }
+
+  forEach(func) {
+    return this.board.forEach(func);
+  }
+
+  map(func) {
+    return this.board.map(func);
   }
 
   dropChip(col, player) {
@@ -68,74 +52,6 @@ class Connect4 {
     const firstEmpty = this.board[col].findIndex(chip => !chip);
     this.board[col][firstEmpty] = player;
     return firstEmpty;
-  }
-
-  async onClick(col) {
-    if (!this.nowPlaying || this.animationInProgress) {
-      return;
-    }
-    const row = this.dropChip(col, this.nowPlaying);
-    const winner = this.checkWinner();
-    if (winner) {
-      this.nowPlaying = false;
-      this.drawBoard();
-      await new Promise(resolve => setTimeout(resolve, 800));
-      if (winner.player === 0) {
-        alert("Habeis empatado");
-      } else {
-        alert("Han ganado las " + this.playerNames[winner.player]);
-      }
-      let response = "";
-      do {
-        response = prompt("¿Quereis volver a jugar (s/n)?");
-      } while (!/[s|n]/i.test(response));
-      if (response.toLowerCase() === "s") {
-        this.nowPlaying = 1;
-        this.animationInProgress = false;
-        this.board = [];
-        this.initBoard();
-        this.drawBoard();
-        $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
-      }
-    } else {
-      this.animationInProgress = true;
-      $(`#anim-${col}`)
-        .css("transition", "transform .6s")
-        .css("transform", `translate(0px,${(6 - row) * 110 - 5}px)`);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      $(`#anim-${col}`)
-        .css("transition", "")
-        .css("transform", `translate(0px,0px)`);
-      this.animationInProgress = false;
-      this.drawBoard();
-      this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
-      $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
-    }
-  }
-
-  onMouseOver(col) {
-    if (this.animationInProgress) {
-      return;
-    }
-    for (let c = 0; c < this.cols; c++) {
-      if (c === col) {
-        if (!this.isColumnFull(col)) {
-          $(`#anim-${col}`).css(
-            "background-color",
-            this.playerColors[this.nowPlaying]
-          );
-        }
-      } else {
-        $(`#anim-${c}`).css("background-color", "transparent");
-      }
-    }
-  }
-
-  onMouseOut(col) {
-    if (this.animationInProgress) {
-      return;
-    }
-    $(`#anim-${col}`).css("background-color", "transparent");
   }
 
   checkWinner() {
@@ -208,6 +124,134 @@ class Connect4 {
     }
 
     return false;
+  }
+
+  checkPossibleWin() {
+    for (let c = 0; c < this.cols; c++) {
+      const b = this.copyOfBoard();
+    }
+    return false;
+  }
+
+  checkPossibleLose() {}
+}
+
+class Connect4 {
+  constructor({ cols = 7, rows = 6 }) {
+    this.cols = cols;
+    this.rows = rows;
+    this.nowPlaying = 1;
+    this.playerColors = ["white", "red", "blue"];
+    this.playerNames = ["", "rojas", "azules"];
+    this.animationInProgress = false;
+    this.board = new Board({ cols, rows });
+    this.drawInit();
+    $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+  }
+
+  drawInit() {
+    for (let c = 0; c < this.cols; c++) {
+      $("#board").append(`<div class="col" id="col-${c}"></div>`);
+      $(`#chip-selector`).append(
+        `<div 
+            class="col-anim" 
+            id="col-anim-${c}" 
+            onclick="game.onClick(${c});" 
+            onmouseover="game.onMouseOver(${c});"
+            onmouseout="game.onMouseOut(${c});"
+          >
+         </div>`
+      );
+      $(`#col-anim-${c}`).append(`<div class="anim" id="anim-${c}"></div>`);
+      for (let r = this.rows - 1; r >= 0; r--) {
+        $(`#col-${c}`).append(`<div class="chip" id="chip-${c}${r}"></div>`);
+      }
+    }
+  }
+
+  drawBoard() {
+    this.board.forEach((statusCol, indexCol) => {
+      statusCol.forEach((chip, indexRow) => {
+        if (!chip) {
+          $(`#chip-${indexCol}${indexRow}`).css(
+            "background-color",
+            "transparent"
+          );
+        } else {
+          $(`#chip-${indexCol}${indexRow}`).css(
+            "background-color",
+            this.playerColors[chip]
+          );
+        }
+      });
+    });
+  }
+
+  async onClick(col) {
+    if (!this.nowPlaying || this.animationInProgress) {
+      return;
+    }
+    const row = this.board.dropChip(col, this.nowPlaying);
+    const winner = this.board.checkWinner();
+    if (winner) {
+      this.nowPlaying = false;
+      this.drawBoard();
+      await new Promise(resolve => setTimeout(resolve, 800));
+      if (winner.player === 0) {
+        alert("Habeis empatado");
+      } else {
+        alert("Han ganado las " + this.playerNames[winner.player]);
+      }
+      let response = "";
+      do {
+        response = prompt("¿Quereis volver a jugar (s/n)?");
+      } while (!/[s|n]/i.test(response));
+      if (response.toLowerCase() === "s") {
+        this.nowPlaying = 1;
+        this.animationInProgress = false;
+        this.board = new Board({ cols: this.cols, rows: this.rows });
+        this.drawBoard();
+        $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+      }
+    } else {
+      this.animationInProgress = true;
+      $(`#anim-${col}`)
+        .css("transition", "transform .6s")
+        .css("transform", `translate(0px,${(6 - row) * 110 - 5}px)`);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      $(`#anim-${col}`)
+        .css("transition", "")
+        .css("transform", `translate(0px,0px)`);
+      this.animationInProgress = false;
+      this.drawBoard();
+      this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
+      $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+    }
+  }
+
+  onMouseOver(col) {
+    if (this.animationInProgress) {
+      return;
+    }
+    for (let c = 0; c < this.cols; c++) {
+      if (c === col) {
+        if (!this.board.isColumnFull(col)) {
+          $(`#anim-${col}`).css(
+            "background-color",
+            this.playerColors[this.nowPlaying]
+          );
+        }
+      } else {
+        $(`#anim-${c}`).css("background-color", "transparent");
+      }
+    }
+  }
+
+  onMouseOut(col) {
+    if (this.animationInProgress) {
+      return;
+    }
+    $(`#anim-${col}`).css("background-color", "transparent");
   }
 }
 

@@ -28,12 +28,14 @@ i:hover {
   display: flex;
   flex-direction: row;
   width: 1200px;
+  z-index: 2;
+  background-color: yellow;
 }
 
 .col {
   display: flex;
   flex-direction: column;
-  background-color: yellow;
+  background-color: transparent;
   width: 10%;
 }
 
@@ -47,10 +49,21 @@ i:hover {
 .chip {
   width: 95px;
   height: 95px;
-  background-color: aliceblue;
+  background-color: rgbs(255, 255, 255, 0.3);
   border-radius: 50%;
   margin: 5px auto;
   border: 2px solid darkcyan;
+  z-index: 2;
+}
+
+.chip {
+  width: 95px;
+  height: 95px;
+  background-color: rgbs(255, 255, 255, 0);
+  border-radius: 50%;
+  margin: 5px auto;
+  border: 2px solid darkcyan;
+  z-index: 2;
 }
 
 .anim {
@@ -59,5 +72,5 @@ i:hover {
   background-color: transparent;
   border-radius: 50%;
   margin: 5px auto;
-  border: 2px solid transparent;
+  z-index: 0;
 }
