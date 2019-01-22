@@ -6,6 +6,8 @@ class Board {
       this.board = [];
       this.initBoard();
     } else {
+      this.rows = baseBoard.rows;
+      this.cols = baseBoard.cols;
       this.board = baseBoard.copy();
     }
     this.initBoard = this.initBoard.bind(this);
@@ -15,8 +17,8 @@ class Board {
     this.map = this.map.bind(this);
     this.dropChip = this.dropChip.bind(this);
     this.checkWinner = this.checkWinner.bind(this);
-    this.checkPossibleWin = this.checkPossibleWin.bind(this);
-    this.checkPossibleLose = this.checkPossibleLose.bind(this);
+    this.checkSmartMoves = this.checkSafeMoves.bind(this);
+    this.nextComputerMove = this.nextComputerMove.bind(this);
   }
 
   initBoard() {
@@ -126,21 +128,54 @@ class Board {
     return false;
   }
 
-  checkPossibleWin() {
-    for (let c = 0; c < this.cols; c++) {
-      const b = this.copyOfBoard();
+  // Returns an array of the cols where you can drop and
+  // in the next move after you the other player cannot win
+  // Returns only 1 element if the player can win inmediately
+  checkSafeMoves(player) {
+    const otherPlayer = player === 1 ? 2 : 1;
+
+    let safePlays = [];
+    for (let col = 0; col < this.cols; col++) {
+      safePlays.push(col);
     }
-    return false;
+    for (let col = 0; col < this.cols; col++) {
+      const boardNext = new Board({ baseBoard: this });
+      if (!boardNext.isColumnFull(col)) {
+        boardNext.dropChip(col, player);
+        let winner = boardNext.checkWinner();
+        if (winner && winner.player === player) {
+          // dropping in this col this player wins
+          return [col];
+        }
+
+        // check with this last dropping the next move is
+        // a winner for the other player
+        let safeColumn = true;
+        for (let col2 = 0; col2 < this.cols; col2++) {
+          const boardPlusTwo = new Board({ baseBoard: boardNext });
+          boardPlusTwo.dropChip(col2, otherPlayer);
+          safeColumn = safeColumn && !boardPlusTwo.checkWinner();
+        }
+        if (!safeColumn) {
+          safePlays = safePlays.filter(item => item !== col);
+        }
+      }
+    }
+    return safePlays;
   }
 
-  checkPossibleLose() {}
+  nextComputerMove(player) {
+    const smartMoves = this.checkSafeMoves(player);
+    return Math.floor(Math.random() * smartMoves.length);
+  }
 }
 
 class Connect4 {
-  constructor({ cols = 7, rows = 6 }) {
+  constructor({ cols = 7, rows = 6, computerPlayer = 0 }) {
     this.cols = cols;
     this.rows = rows;
     this.nowPlaying = 1;
+    this.computerPlayer = computerPlayer;
     this.playerColors = ["white", "red", "blue"];
     this.playerNames = ["", "rojas", "azules"];
     this.animationInProgress = false;
@@ -193,10 +228,19 @@ class Connect4 {
     }
     const row = this.board.dropChip(col, this.nowPlaying);
     const winner = this.board.checkWinner();
+    this.animationInProgress = true;
+    $(`#anim-${col}`)
+      .css("transition", "transform .6s")
+      .css("transform", `translate(0px,${(6 - row) * 110 - 5}px)`);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    $(`#anim-${col}`)
+      .css("transition", "")
+      .css("transform", `translate(0px,0px)`);
+    this.animationInProgress = false;
+    this.drawBoard();
     if (winner) {
       this.nowPlaying = false;
-      this.drawBoard();
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 400));
       if (winner.player === 0) {
         alert("Habeis empatado");
       } else {
@@ -214,17 +258,11 @@ class Connect4 {
         $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
       }
     } else {
-      this.animationInProgress = true;
-      $(`#anim-${col}`)
-        .css("transition", "transform .6s")
-        .css("transform", `translate(0px,${(6 - row) * 110 - 5}px)`);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      $(`#anim-${col}`)
-        .css("transition", "")
-        .css("transform", `translate(0px,0px)`);
-      this.animationInProgress = false;
-      this.drawBoard();
       this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
+      if (this.nowPlaying === this.computerPlayer) {
+        console.log(this.board.checkSafeMoves(this.nowPlaying));
+        console.log(this.board.nextComputerMove(this.nowPlaying));
+      }
       $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
     }
   }
@@ -255,7 +293,7 @@ class Connect4 {
   }
 }
 
-let game = new Connect4({ cols: 7, rows: 6 });
+let game = new Connect4({ cols: 7, rows: 6, computerPlayer: 2 });
 
 alert(
   `Puedes salir o reiniciar en cualquier momento con los iconos al lado del título`
