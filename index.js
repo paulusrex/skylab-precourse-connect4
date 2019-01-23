@@ -38,12 +38,12 @@ class Board {
     return this.board.map(col => [...col]);
   }
 
-  forEach(func) {
-    return this.board.forEach(func);
+  forEach(func, thisArg) {
+    return this.board.forEach(func, thisArg);
   }
 
-  map(func) {
-    return this.board.map(func);
+  map(func, thisArg) {
+    return this.board.map(func, thisArg);
   }
 
   dropChip(col, player) {
@@ -54,6 +54,17 @@ class Board {
     const firstEmpty = this.board[col].findIndex(chip => !chip);
     this.board[col][firstEmpty] = player;
     return firstEmpty;
+  }
+
+  colsAvaliable() {
+    return this.board
+      .map((_, col) => (this.isColumnFull(col) ? false : col))
+      .filter(res => res !== false);
+  }
+
+  isThisPlayerWinner(player) {
+    const checkResult = this.checkWinner();
+    return checkResult && checkResult.player === player;
   }
 
   checkWinner() {
@@ -134,30 +145,43 @@ class Board {
   checkSafeMoves(player) {
     const otherPlayer = player === 1 ? 2 : 1;
 
-    let safePlays = [];
-    for (let col = 0; col < this.cols; col++) {
-      safePlays.push(col);
-    }
-    for (let col = 0; col < this.cols; col++) {
+    let safePlays = this.colsAvaliable();
+    for (let i = 0; i < this.colsAvaliable().length; i++) {
+      const col1 = this.colsAvaliable()[i];
       const boardNext = new Board({ baseBoard: this });
-      if (!boardNext.isColumnFull(col)) {
-        boardNext.dropChip(col, player);
-        let winner = boardNext.checkWinner();
-        if (winner && winner.player === player) {
-          // dropping in this col this player wins
-          return [col];
-        }
+      boardNext.dropChip(col1, player);
+      if (boardNext.isThisPlayerWinner(player)) {
+        // dropping in this col this player wins
+        return [col1];
+      }
 
-        // check with this last dropping the next move is
-        // a winner for the other player
-        let safeColumn = true;
-        for (let col2 = 0; col2 < this.cols; col2++) {
-          const boardPlusTwo = new Board({ baseBoard: boardNext });
-          boardPlusTwo.dropChip(col2, otherPlayer);
-          safeColumn = safeColumn && !boardPlusTwo.checkWinner();
+      // check with this last dropping the next move is
+      // a winner for the other player
+      let safeColumn = true;
+      let sureWinAfter3Moves = true;
+      for (let j = 0; j < boardNext.colsAvaliable().length; j++) {
+        let col2 = boardNext.colsAvaliable()[j];
+        const boardPlus2 = new Board({ baseBoard: boardNext });
+        boardPlus2.dropChip(col2, otherPlayer);
+        safeColumn = safeColumn && !boardPlus2.isThisPlayerWinner(otherPlayer);
+        // check if with this column no matter what, my next movement will win
+        if (safeColumn) {
+          let oneMoveWinsHere = false;
+          boardPlus2.colsAvaliable().forEach(col3 => {
+            const boardPlus3 = new Board({ baseBoard: boardPlus2 });
+            boardPlus3.dropChip(col3, player);
+            oneMoveWinsHere =
+              oneMoveWinsHere || boardPlus3.isThisPlayerWinner(player);
+          });
+          sureWinAfter3Moves = sureWinAfter3Moves && oneMoveWinsHere;
         }
-        if (!safeColumn) {
-          safePlays = safePlays.filter(item => item !== col);
+      }
+
+      if (!safeColumn) {
+        safePlays = safePlays.filter(item => item !== col1);
+      } else {
+        if (sureWinAfter3Moves) {
+          return [col1];
         }
       }
     }
@@ -166,7 +190,15 @@ class Board {
 
   nextComputerMove(player) {
     const smartMoves = this.checkSafeMoves(player);
-    return Math.floor(Math.random() * smartMoves.length);
+    if (smartMoves.length === 0) {
+      // I lost - random col
+      let col = Math.floor(Math.random() * this.cols);
+      while (this.isColumnFull(col)) {
+        col = Math.floor(Math.random() * this.cols);
+      }
+      return col;
+    }
+    return smartMoves[Math.floor(Math.random() * smartMoves.length)];
   }
 }
 
@@ -261,7 +293,8 @@ class Connect4 {
       this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
       if (this.nowPlaying === this.computerPlayer) {
         console.log(this.board.checkSafeMoves(this.nowPlaying));
-        console.log(this.board.nextComputerMove(this.nowPlaying));
+        const nextMove = this.board.nextComputerMove(this.nowPlaying);
+        this.onClick(nextMove);
       }
       $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
     }
