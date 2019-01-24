@@ -146,8 +146,7 @@ class Board {
     const otherPlayer = player === 1 ? 2 : 1;
 
     let safePlays = this.colsAvaliable();
-    for (let i = 0; i < this.colsAvaliable().length; i++) {
-      const col1 = this.colsAvaliable()[i];
+    for (const col1 of this.colsAvaliable()) {
       const boardNext = new Board({ baseBoard: this });
       boardNext.dropChip(col1, player);
       if (boardNext.isThisPlayerWinner(player)) {
@@ -159,8 +158,7 @@ class Board {
       // a winner for the other player
       let safeColumn = true;
       let sureWinAfter3Moves = true;
-      for (let j = 0; j < boardNext.colsAvaliable().length; j++) {
-        let col2 = boardNext.colsAvaliable()[j];
+      for (const col2 of boardNext.colsAvaliable()) {
         const boardPlus2 = new Board({ baseBoard: boardNext });
         boardPlus2.dropChip(col2, otherPlayer);
         safeColumn = safeColumn && !boardPlus2.isThisPlayerWinner(otherPlayer);
@@ -218,33 +216,26 @@ class Connect4 {
 
   drawInit() {
     for (let c = 0; c < this.cols; c++) {
-      $("#board").append(`<div class="col" id="col-${c}"></div>`);
       $(`#chip-selector`).append(
         `<div 
-            class="col-anim" 
-            id="col-anim-${c}" 
+            class="anim" 
+            id="anim-${c}" 
+            style="left: ${c * 105 + 90}px;"
             onclick="game.onClick(${c});" 
             onmouseover="game.onMouseOver(${c});"
             onmouseout="game.onMouseOut(${c});"
           >
          </div>`
       );
-      $(`#col-anim-${c}`).append(`<div class="anim" id="anim-${c}"></div>`);
-      for (let r = this.rows - 1; r >= 0; r--) {
-        $(`#col-${c}`).append(`<div class="chip" id="chip-${c}${r}"></div>`);
-      }
+      // $(`#col-anim-${c}`).append(`<div class="anim" id="anim-${c}"></div>`);
     }
   }
 
   drawBoard() {
+    return;
     this.board.forEach((statusCol, indexCol) => {
       statusCol.forEach((chip, indexRow) => {
         if (!chip) {
-          $(`#chip-${indexCol}${indexRow}`).css(
-            "background-color",
-            "transparent"
-          );
-        } else {
           $(`#chip-${indexCol}${indexRow}`).css(
             "background-color",
             this.playerColors[chip]
@@ -259,17 +250,17 @@ class Connect4 {
       return;
     }
     const row = this.board.dropChip(col, this.nowPlaying);
+    $(`#anim-${col}`)
+      .clone()
+      .appendTo("#board")
+      .removeClass("anim")
+      .addClass("chip")
+      .prop("id", `#chip-${col}${row}`)
+      .css("transition", "1s")
+      .css("top", `${(6 - row) * 94 + 150}px`)
+      .css("left", `${col * 105 + 100}px`)
+      .css("background-color", this.playerColors[this.nowPlaying]);
     const winner = this.board.checkWinner();
-    this.animationInProgress = true;
-    $(`#anim-${col}`)
-      .css("transition", "transform .6s")
-      .css("transform", `translate(0px,${(6 - row) * 110 - 5}px)`);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    $(`#anim-${col}`)
-      .css("transition", "")
-      .css("transform", `translate(0px,0px)`);
-    this.animationInProgress = false;
-    this.drawBoard();
     if (winner) {
       this.nowPlaying = false;
       await new Promise(resolve => setTimeout(resolve, 400));
@@ -292,7 +283,6 @@ class Connect4 {
     } else {
       this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
       if (this.nowPlaying === this.computerPlayer) {
-        console.log(this.board.checkSafeMoves(this.nowPlaying));
         const nextMove = this.board.nextComputerMove(this.nowPlaying);
         this.onClick(nextMove);
       }
@@ -304,17 +294,11 @@ class Connect4 {
     if (this.animationInProgress) {
       return;
     }
-    for (let c = 0; c < this.cols; c++) {
-      if (c === col) {
-        if (!this.board.isColumnFull(col)) {
-          $(`#anim-${col}`).css(
-            "background-color",
-            this.playerColors[this.nowPlaying]
-          );
-        }
-      } else {
-        $(`#anim-${c}`).css("background-color", "transparent");
-      }
+    if (!this.board.isColumnFull(col)) {
+      $(`#anim-${col}`).css(
+        "background-color",
+        this.playerColors[this.nowPlaying]
+      );
     }
   }
 

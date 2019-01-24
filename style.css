@@ -1,7 +1,7 @@
 #root {
   /* display: flex;
   flex-direction: col; */
-  width: 1200px;
+  width: 1000px;
 }
 
 h1 {
@@ -19,58 +19,41 @@ i:hover {
 }
 
 #chip-selector {
-  display: flex;
-  flex-direction: row;
-  width: 1200px;
+  position: absolute;
+  width: 1000px;
 }
 
 #board {
-  display: flex;
-  flex-direction: row;
-  width: 1200px;
-  z-index: 2;
-  background-color: yellow;
-}
-
-.col {
-  display: flex;
-  flex-direction: column;
-  background-color: transparent;
-  width: 10%;
-}
-
-.col-anim {
-  display: flex;
-  flex-direction: column;
-  background-color: yellow;
-  width: 10%;
-}
-
-.chip {
-  width: 95px;
-  height: 95px;
-  background-color: rgbs(255, 255, 255, 0.3);
-  border-radius: 50%;
-  margin: 5px auto;
-  border: 2px solid darkcyan;
+  width: 1000px;
   z-index: 2;
 }
 
 .chip {
-  width: 95px;
-  height: 95px;
-  background-color: rgbs(255, 255, 255, 0);
+  position: absolute;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  margin: 5px auto;
-  border: 2px solid darkcyan;
   z-index: 2;
 }
 
 .anim {
-  width: 95px;
-  height: 95px;
-  background-color: transparent;
+  position: absolute;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  margin: 5px auto;
-  z-index: 0;
+  background-color: transparent;
+  z-index: 3;
+}
+
+#board-svg {
+  position: absolute;
+  width: 100%;
+  height: 800px;
+  top: 200px;
+  left: 50px;
+  z-index: 10;
+}
+
+#board-svg path {
+  fill: aqua;
 }
