@@ -201,17 +201,51 @@ class Board {
 }
 
 class Connect4 {
-  constructor({ cols = 7, rows = 6, computerPlayer = 0 }) {
+  constructor({ cols = 7, rows = 6, computerPlayer = 0, demo = false }) {
     this.cols = cols;
     this.rows = rows;
     this.nowPlaying = 1;
     this.computerPlayer = computerPlayer;
+    this.demo = demo;
     this.playerColors = ["white", "red", "blue"];
     this.playerNames = ["", "rojas", "azules"];
     this.animationInProgress = false;
     this.board = new Board({ cols, rows });
     this.drawInit();
+    this.machineTurn = this.machineTurn.bind(this);
+    this.interval = setInterval(this.machineTurn, 1500);
     $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+  }
+
+  machineTurn() {
+    const winner = this.board.checkWinner();
+    if (winner) {
+      this.nowPlaying = false;
+      if (winner.player === 0) {
+        alert("Habeis empatado");
+      } else {
+        alert("Han ganado las " + this.playerNames[winner.player]);
+      }
+      let response = "";
+      do {
+        response = prompt("¿Quereis volver a jugar (s/n)?");
+      } while (!/[s|n]/i.test(response));
+      if (response.toLowerCase() === "s") {
+        this.nowPlaying = 1;
+        this.animationInProgress = false;
+        $(".chip").remove();
+        this.board = new Board({ cols: this.cols, rows: this.rows });
+        $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+      }
+    } else {
+      if (
+        !this.animationInProgress &&
+        (this.computerPlayer === this.nowPlaying || this.demo)
+      ) {
+        const nextMove = this.board.nextComputerMove(this.nowPlaying);
+        this.onClick(nextMove);
+      }
+    }
   }
 
   drawInit() {
@@ -231,62 +265,38 @@ class Connect4 {
     }
   }
 
-  drawBoard() {
-    return;
-    this.board.forEach((statusCol, indexCol) => {
-      statusCol.forEach((chip, indexRow) => {
-        if (!chip) {
-          $(`#chip-${indexCol}${indexRow}`).css(
-            "background-color",
-            this.playerColors[chip]
-          );
-        }
-      });
-    });
-  }
-
-  async onClick(col) {
+  onClick(col) {
     if (!this.nowPlaying || this.animationInProgress) {
       return;
     }
     const row = this.board.dropChip(col, this.nowPlaying);
+    this.animationInProgress = true;
     $(`#anim-${col}`)
+      .css("background-color", "transparent")
       .clone()
       .appendTo("#board")
       .removeClass("anim")
       .addClass("chip")
       .prop("id", `#chip-${col}${row}`)
       .css("transition", "1s")
-      .css("top", `${(6 - row) * 94 + 150}px`)
       .css("left", `${col * 105 + 100}px`)
-      .css("background-color", this.playerColors[this.nowPlaying]);
+      .css("background-color", this.playerColors[this.nowPlaying])
+      .animate(
+        { top: `${(6 - row) * 94 + 150}px` },
+        {
+          duration: 500,
+          complete: () => {
+            this.animationInProgress = false;
+            this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
+            $("h2").text(
+              `Es el turno de las ${this.playerNames[this.nowPlaying]}`
+            );
+          },
+        }
+      );
     const winner = this.board.checkWinner();
     if (winner) {
       this.nowPlaying = false;
-      await new Promise(resolve => setTimeout(resolve, 400));
-      if (winner.player === 0) {
-        alert("Habeis empatado");
-      } else {
-        alert("Han ganado las " + this.playerNames[winner.player]);
-      }
-      let response = "";
-      do {
-        response = prompt("¿Quereis volver a jugar (s/n)?");
-      } while (!/[s|n]/i.test(response));
-      if (response.toLowerCase() === "s") {
-        this.nowPlaying = 1;
-        this.animationInProgress = false;
-        this.board = new Board({ cols: this.cols, rows: this.rows });
-        this.drawBoard();
-        $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
-      }
-    } else {
-      this.nowPlaying = this.nowPlaying === 1 ? 2 : 1;
-      if (this.nowPlaying === this.computerPlayer) {
-        const nextMove = this.board.nextComputerMove(this.nowPlaying);
-        this.onClick(nextMove);
-      }
-      $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
     }
   }
 
@@ -310,7 +320,7 @@ class Connect4 {
   }
 }
 
-let game = new Connect4({ cols: 7, rows: 6, computerPlayer: 2 });
+let game = new Connect4({ cols: 7, rows: 6, computerPlayer: 2, demo: false });
 
 alert(
   `Puedes salir o reiniciar en cualquier momento con los iconos al lado del título`
