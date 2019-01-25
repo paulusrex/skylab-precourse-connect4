@@ -1,0 +1,32 @@
+{
+  "name": "pc-connect4",
+  "version": "1.0.0",
+  "description": "Connect 4 web",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "jest --watchAll"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulusrex/skylab-precourse-connect4.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/paulusrex/skylab-precourse-connect4/issues"
+  },
+  "homepage": "https://github.com/paulusrex/skylab-precourse-connect4#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.6.0",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.6.0",
+    "regenerator-runtime": "^0.13.1"
+  },
+  "jest": {
+    "transform": {}
+  }
+}
