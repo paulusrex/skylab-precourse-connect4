@@ -1,5 +1,34 @@
+body {
+  width: 100%;
+  font-family: "Montserrat", sans-serif;
+}
+
+#welcome {
+  width: 60%;
+  margin: 0 auto;
+}
+
+#welcome-card {
+  display: flex;
+  align-items: center;
+}
+
+#welcome-buttons {
+  margin: auto;
+}
+
+#welcome-buttons button {
+  margin: 0 auto;
+  background-color: rgb(12, 119, 161);
+  height: 40px;
+  padding: 10px;
+  color: white;
+}
+
 #root {
+  top: 1000px;
   width: 1000px;
+  margin: auto;
 }
 
 h1 {
@@ -18,11 +47,13 @@ i:hover {
 
 #chip-selector {
   position: absolute;
-  width: 1000px;
+  width: 100%;
 }
 
 #board {
-  width: 1000px;
+  position: absolute;
+  top: 100px;
+  width: 100%;
   z-index: 2;
 }
 
@@ -39,6 +70,7 @@ i:hover {
   width: 90px;
   height: 90px;
   border-radius: 50%;
+  border: 1px solid #c1c1c1;
   background-color: transparent;
   z-index: 3;
 }
@@ -47,7 +79,7 @@ i:hover {
   position: absolute;
   width: 100%;
   height: 800px;
-  top: 200px;
+  top: 110px;
   left: 50px;
   z-index: 10;
 }

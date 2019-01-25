@@ -12,13 +12,19 @@ class Connect4 {
     this.drawInit();
     this.machineTurn = this.machineTurn.bind(this);
     this.interval = setInterval(this.machineTurn, 1500);
-    $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+    $("#turn-title").text(
+      `Es el turno de las ${this.playerNames[this.nowPlaying]}`
+    );
   }
 
   machineTurn() {
     const winner = this.board.checkWinner();
     if (winner) {
       this.nowPlaying = false;
+      if (this.demo) {
+        this.reset();
+        return;
+      }
       if (winner.player === 0) {
         alert("Habeis empatado");
       } else {
@@ -29,11 +35,7 @@ class Connect4 {
         response = prompt("¿Quereis volver a jugar (s/n)?");
       } while (!/[s|n]/i.test(response));
       if (response.toLowerCase() === "s") {
-        this.nowPlaying = 1;
-        this.animationInProgress = false;
-        $(".chip").remove();
-        this.board = new Board({ cols: this.cols, rows: this.rows });
-        $("h2").text(`Es el turno de las ${this.playerNames[this.nowPlaying]}`);
+        this.reset();
       }
     } else {
       if (
@@ -59,7 +61,6 @@ class Connect4 {
           >
          </div>`
       );
-      // $(`#col-anim-${c}`).append(`<div class="anim" id="anim-${c}"></div>`);
     }
   }
 
@@ -68,6 +69,7 @@ class Connect4 {
       return;
     }
     const row = this.board.dropChip(col, this.nowPlaying);
+    const { top, left } = $("#board-svg").position();
     this.animationInProgress = true;
     $(`#anim-${col}`)
       .css("background-color", "transparent")
@@ -77,10 +79,10 @@ class Connect4 {
       .addClass("chip")
       .prop("id", `#chip-${col}${row}`)
       .css("transition", "1s")
-      .css("left", `${col * 105 + 100}px`)
+      .css("left", `${col * 105 + (left - 17)}px`)
       .css("background-color", this.playerColors[this.nowPlaying])
       .animate(
-        { top: `${(6 - row) * 94 + 150}px` },
+        { top: `${(6 - row) * 94 + (top - 150)}px` },
         {
           duration: 500,
           complete: () => {
@@ -96,6 +98,18 @@ class Connect4 {
     if (winner) {
       this.nowPlaying = false;
     }
+  }
+
+  reset() {
+    this.nowPlaying = 1;
+    this.animationInProgress = false;
+    $(".chip")
+      .fadeOut()
+      .remove();
+    this.board = new Board({ cols: this.cols, rows: this.rows });
+    $("#turn-title").text(
+      `Es el turno de las ${this.playerNames[this.nowPlaying]}`
+    );
   }
 
   onMouseOver(col) {
@@ -118,8 +132,16 @@ class Connect4 {
   }
 }
 
-let game = new Connect4({ cols: 7, rows: 6, computerPlayer: 2, demo: false });
+let game;
+function begin(numPlayers) {
+  game = new Connect4({
+    cols: 7,
+    rows: 6,
+    computerPlayer: numPlayers === 2 ? 0 : 2,
+    demo: numPlayers === 0,
+  });
+  $("#welcome").slideUp();
+  $("#root").fadeIn(1000);
+}
 
-alert(
-  `Puedes salir o reiniciar en cualquier momento con los iconos al lado del título`
-);
+$("#root").hide();

@@ -57,6 +57,30 @@ test("inminent loss", () => {
   expect(board.checkSafeMoves(player)).toEqual([]);
 });
 
+test("inminent loss", () => {
+  const board = new Board({});
+  board.board[0] = [2, false, false, false, false, false];
+  board.board[1] = [2, false, false, false, false, false];
+  board.board[2] = [2, false, false, false, false, false];
+  board.board[3] = [false, false, false, false, false, false];
+  board.board[4] = [false, false, false, false, false, false];
+  board.board[5] = [false, false, false, false, false, false];
+  board.board[6] = [false, false, false, false, false, false];
+  expect(board.checkSafeMoves(player)).toEqual([3]);
+});
+
+test("Only return avaliable columns", () => {
+  const board = new Board({});
+  board.board[0] = [false, false, false, false, false, false];
+  board.board[1] = [1, 2, 1, 1, 2, 1];
+  board.board[2] = [2, 1, 2, 1, 2, 1];
+  board.board[3] = [2, false, false, false, false, false];
+  board.board[4] = [1, false, false, false, false, false];
+  board.board[5] = [false, false, false, false, false, false];
+  board.board[6] = [false, false, false, false, false, false];
+  expect(board.checkSafeMoves(player)).toEqual([0, 3, 4, 5, 6]);
+});
+
 test("cuts sure win for opponent", () => {
   const board = new Board({});
   board.board[0] = [false, false, false, false, false, false];
