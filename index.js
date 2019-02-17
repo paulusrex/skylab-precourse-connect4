@@ -79,7 +79,7 @@ class Connect4 {
       .addClass("chip")
       .prop("id", `#chip-${col}${row}`)
       .css("transition", "1s")
-      .css("left", `${col * 105 + (left - 17)}px`)
+      .css("left", `${col * 105 + 90}px`)
       .css("background-color", this.playerColors[this.nowPlaying])
       .animate(
         { top: `${(6 - row) * 94 + (top - 150)}px` },

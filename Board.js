@@ -46,13 +46,19 @@ class Board {
     return this.board.map(func, thisArg);
   }
 
-  dropChip(col, player) {
+  rowDropChip(col) {
     if (this.isColumnFull(col)) {
       // column full
       return false;
     }
-    const firstEmpty = this.board[col].findIndex(chip => !chip);
-    this.board[col][firstEmpty] = player;
+    return this.board[col].findIndex(chip => !chip);
+  }
+
+  dropChip(col, player) {
+    const firstEmpty = this.rowDropChip(col);
+    if (firstEmpty !== false) {
+      this.board[col][firstEmpty] = player;
+    }
     return firstEmpty;
   }
 
@@ -142,9 +148,27 @@ class Board {
   // Returns an array of the cols where you can drop and
   // in the next move after you the other player cannot win
   // Returns only 1 element if the player can win inmediately
+  checkKnownPositions(player) {
+    for (let c = 0; c < this.cols - 5; c++) {
+      const initialDropChip = this.rowDropChip(c);
+      const result =
+        this.board[c][initialDropChip] === false &&
+        this.board[c + 1][initialDropChip] !== false &&
+        this.board[c + 2][initialDropChip] ===
+          this.board[c + 1][initialDropChip] &&
+        this.board[c + 3][initialDropChip] === false &&
+        this.board[c + 3][initialDropChip] === false;
+      if (result) {
+        return [c, c + 3];
+      }
+    }
+    return false;
+  }
+
   checkSafeMoves(player) {
     const otherPlayer = player === 1 ? 2 : 1;
 
+    // general checkings
     let safePlays = this.colsAvaliable();
     for (const col1 of this.colsAvaliable()) {
       const boardNext = new Board({ baseBoard: this });
@@ -182,6 +206,10 @@ class Board {
           return [col1];
         }
       }
+    }
+    const knownPositions = this.checkKnownPositions(player);
+    if (knownPositions) {
+      return knownPositions;
     }
     return safePlays;
   }

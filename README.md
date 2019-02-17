@@ -1,5 +1,10 @@
 # skylab-precourse-connect4
+
 Connect 4 web
+
+## Repositorio
+
+https://github.com/paulusrex/skylab-precourse-connect4
 
 ## Objetivo
 

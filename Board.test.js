@@ -57,7 +57,7 @@ test("inminent loss", () => {
   expect(board.checkSafeMoves(player)).toEqual([]);
 });
 
-test("inminent loss", () => {
+test("inminent win", () => {
   const board = new Board({});
   board.board[0] = [2, false, false, false, false, false];
   board.board[1] = [2, false, false, false, false, false];
